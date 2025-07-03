@@ -4,31 +4,32 @@ import { useRouter } from 'next/router';
 import { auth, db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-// Define the available tags that users can choose from
+// TODO: change if i want to change the kind of topic? do i want this QA to be CS focused or more general?
 const AVAILABLE_TAGS = [
   'javascript', 'react', 'python', 'nodejs', 'firebase', 
   'nextjs', 'typescript', 'css', 'html', 'database'
-];
+];  
 
 const AskPage: NextPage = () => {
   const router = useRouter();
 
-  // State variables to store form data
+  // State variables to store form data (useState hook)
   const [title, setTitle] = useState('');           // Question title
   const [body, setBody] = useState('');             // Question body/details
   const [selectedTags, setSelectedTags] = useState<string[]>([]); // Selected tags
   const [loading, setLoading] = useState(false);    // Loading state for submit button
   const [error, setError] = useState('');           // Error message
 
-  // Check if user is authenticated - if not, redirect to sign in
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(user => {
       if (!user) {
-        router.replace('/signin');
+        router.replace('/signin');  // redirect to sign in if not signed in!
       }
     });
     return unsub;
   }, [router]);
+
+
 
   // Show loading message while checking authentication
   if (!auth.currentUser) {
@@ -40,25 +41,28 @@ const AskPage: NextPage = () => {
     setSelectedTags(prev => {
       if (prev.includes(tag)) {
         // If tag is already selected, remove it
-        return prev.filter(t => t !== tag);
+        return prev.filter(t => t !== tag);   // filters out all tags that aren't the tag we clicked on (to remove it)
       } else {
         // If tag is not selected, add it (but limit to 3 tags)
         if (prev.length < 3) {
           return [...prev, tag];
         }
-        return prev; // Don't add if already at 3 tags
+        return prev; // nothign added if length already at 3
       }
     });
   };
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent the form from reloading the page
+    e.preventDefault(); // prevents from reloading (historically HTML would reload the page if you reload! interesting!)
+    // this allows for us to check for errors and such and it not reloading the entire page
     
     // Clear any previous errors
     setError('');
     
     // Basic form validation
+    // trim removes whitespace from the beginning and end of the string
+    // essentially acts as a check if title is empty considering if they add spaces or returns or such, since those also aren't valid
     if (!title.trim()) {
       setError('Please enter a title');
       return;
@@ -90,6 +94,7 @@ const AskPage: NextPage = () => {
 
       // Add the document to the 'questions' collection
       const docRef = await addDoc(collection(db, 'questions'), questionData);
+      // await acts as a promise to wait for document to be created before moving on
       
       // Redirect to the new question page
       router.push(`/questions/${docRef.id}`);
