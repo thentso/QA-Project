@@ -2,6 +2,7 @@
 
 ## Overview
 A real-time Q&A web app where users can sign in, ask questions, answer others, vote, accept answers, and summon AI-generated summaries of top answers.
+Hopefully also add direct message feature later!
 
 ### Tech Stack
 - **Front-end:** Next.js (TypeScript), React, Tailwind CSS
@@ -62,4 +63,3 @@ A real-time Q&A web app where users can sign in, ask questions, answer others, v
 See `.env.local.example` for required variables.
 
 ## License
-MIT 
